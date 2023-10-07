@@ -28,7 +28,7 @@ struct List {
 
 	void insertList(unsigned long long index, List* list); // ¹13
 
-	void deleteLast(); // ¹3
+	void deleteLast(); // ¹3 
 
 	void deleteFirst(); // ¹4
 

@@ -54,17 +54,16 @@ void List::insert(unsigned long long index, Node* elem) {
 		this->push_front(elem);
 		return;
 	}
-	Node* tmp = this->head;
-	unsigned long long length = 0;
-	while (tmp->next->next != nullptr) {
-		if (length + 1 == index) {
-			elem->next = tmp->next;
-			tmp->next = elem;
-			return;
-		}
-		tmp = tmp->next;
-		++length;
+	Node* cur = this->head, *prev = nullptr;
+	unsigned long long len = 0;
+	while (cur != nullptr && len != index) {
+		prev = cur;
+		cur = cur->next;
+		++len;
 	}
+	if (cur == nullptr) return;
+	prev->next = elem;
+	elem->next = cur;
 }
 
 void List::appendList(List* list) {
@@ -73,9 +72,12 @@ void List::appendList(List* list) {
 		this->head = list->head;
 		return;
 	}
-	Node* tmp = this->head;
-	while (tmp->next != nullptr) tmp = tmp->next;
-	tmp->next = list->head;
+	Node* tmp = this->head, * prev = nullptr;
+	while (tmp != nullptr) {
+		prev = tmp;
+		tmp = tmp->next;
+	}
+	prev->next = list->head;
 }
 
 void List::frontList(List* list) {
@@ -95,19 +97,18 @@ void List::insertList(unsigned long long index, List* list) {
 		this->frontList(list);
 		return;
 	}
-	Node* this_tmp = this->head;
-	unsigned long long length = 0;
-	while (this_tmp->next->next != nullptr) {
-		if (length + 1 == index) {
-			Node* other_tmp = list->head;
-			while (other_tmp->next != nullptr) other_tmp = other_tmp->next;
-			other_tmp->next = this_tmp->next;
-			this_tmp = list->head;
-			return;
-		}
-		this_tmp = this_tmp->next;
-		++length;
+	Node* cur = this->head, *prev = nullptr;
+	unsigned long long len = 0;
+	while (cur != nullptr && len != index) {
+		prev = cur;
+		cur = cur->next;
+		++len;
 	}
+	if (cur == nullptr) return;
+	Node* other_cur = list->head;
+	while (other_cur->next != nullptr) other_cur = other_cur->next;
+	prev->next = list->head;
+	other_cur->next = cur;
 }
 
 void List::deleteLast() {
@@ -138,18 +139,16 @@ void List::deleteByIndex(unsigned long long index) {
 		this->deleteFirst();
 		return;
 	}
-	Node* tmp = this->head;
-	unsigned long long length = 0;
-	while (tmp->next->next != nullptr) {
-		if (length + 1 == index) {
-			Node* toDel = tmp->next;
-			tmp->next = toDel->next;
-			delete toDel;
-			return;
-		}
-		tmp = tmp->next;
-		++length;
+	Node* cur = this->head, *prev = nullptr;
+	unsigned long long len = 0;
+	while (cur != nullptr && len != index) {
+		prev = cur;
+		cur = cur->next;
+		++len;
 	}
+	if (cur == nullptr) return;
+	prev->next = cur->next;
+	delete cur;
 }
 
 void List::deleteList() {
@@ -158,19 +157,24 @@ void List::deleteList() {
 
 void List::replace(unsigned long long index, Node* elem) {
 	if (this->isEmpty()) return;
-	Node* tmp = this->head;
-	unsigned long long length = 0;
-	while (tmp->next->next != nullptr) {
-		if (length + 1 == index) {
-			Node* toDel = tmp->next;
-			elem->next = toDel->next;
-			tmp->next = elem;
-			delete toDel;
-			return;
-		}
-		tmp = tmp->next;
-		++length;
+	Node* cur = this->head;
+	if (index == 0) {
+		elem->next = cur->next;
+		this->head = elem;
+		delete cur;
+		return;
 	}
+	Node* prev = nullptr;
+	unsigned long long len = 0;
+	while (cur != nullptr && len != index) {
+		prev = cur;
+		cur = cur->next;
+		++len;
+	}
+	if (cur == nullptr) return;
+	prev->next = elem;
+	elem->next = cur->next;
+	delete cur;
 }
 
 void List::swap(unsigned long long index1, unsigned long long index2) {
@@ -234,7 +238,7 @@ bool List::isListInside(List* list) {
 }
 
 long long List::searchFirstSublist(List* list) {
-	if (this->isEmpty() && list->isEmpty()) return 0;
+	if (this->isEmpty() && list->isEmpty()) return -1;
 	if (this->isEmpty() || list->isEmpty()) return -1;
 	long long index = 0;
 	Node* cur1 = this->head, * cur2 = list->head;
@@ -258,7 +262,7 @@ long long List::searchFirstSublist(List* list) {
 }
 
 long long List::searchLastSublist(List* list) {
-	if (this->isEmpty() && list->isEmpty()) return 0;
+	if (this->isEmpty() && list->isEmpty()) return -1;
 	if (this->isEmpty() || list->isEmpty()) return -1;
 	long long curIndex = 0, lastIndex = -1;
 	Node* cur1 = this->head, * cur2 = list->head;
